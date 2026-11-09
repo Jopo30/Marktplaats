@@ -27,3 +27,6 @@ De bestaande Render static site kan deze server niet uitvoeren. Een aparte
 webservice of expliciete migratie is nodig. Publiceer pas na beoordeling;
 wijzig geen tradingservices. Officiële API kan later dezelfde providerinterface
 overnemen. Beschikbaarheid van het website-endpoint geeft geen toestemming.
+
+## Inloggen
+Gebruik de bestaande dashboardtoegangscode als wachtwoord. Optioneel 30 dagen ingelogd blijven via een ondertekende HttpOnly/Secure/SameSite=Strict-cookie; anders een browser-sessie met maximaal 12 uur geldigheid. Uitloggen wist de cookie. De server bewaart geen wachtwoord in browseropslag. Een herstart behoudt geldige cookies zolang de servercode ongewijzigd blijft. Roteer DEALHUNTER_ACCESS_TOKEN om alle sessies ongeldig te maken. Maximaal tien mislukte inlogpogingen per kwartier per serverinstantie. Zoekverzoeken gebruiken voortaan de sessiecookie; Bearer-authenticatie is vervangen.
