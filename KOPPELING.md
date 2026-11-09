@@ -1,6 +1,6 @@
 # Marktplaats Dealhunter — koppeling (ontwerp)
 
-Status: ontwerp, **niet live aangesloten**. Het dashboard in index.html bevat uitsluitend demo-advertenties.
+Status: lokale proef met handmatig zoeken via de website-zoekinterface. Het dashboard toont echte resultaten na een zoekopdracht. Nog niet op Render gepubliceerd. Zie README.md voor starten en beperkingen. Onderstaand ontwerp voor automatische monitoring, database, waardebepaling en Telegram blijft toekomstig werk.
 
 ## Zoekinstellingen
 - Start: Makita, DeWalt, Milwaukee; later Gaming en Camera.
@@ -32,3 +32,4 @@ Endpoint GET /v2/search; gedocumenteerde filters: query, postCode, distance, lim
 - Live integratietests en monitoring.
 
 Bestaande tradingservices en repositories blijven buiten scope.
+
