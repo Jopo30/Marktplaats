@@ -53,9 +53,19 @@ http.createServer(async (req,res) => {
     try {input = validate(JSON.parse(raw));} catch(e) {return send(res,400,{error:e.message});}
     const key = JSON.stringify(input), cached = cache.get(key);
     if (cached && Date.now()-Date.parse(cached.fetchedAt)<300000) return send(res,200,{...cached,cached:true});
-    if (busy || Date.now()-lastAttempt<300000) return send(res,429,{error:'Wacht vijf minuten tussen nieuwe zoekopdrachten.'});
+    if (busy) return send(res,429,{error:'Er wordt nog een zoekopdracht opgehaald. Probeer het zo nog eens.'});
+    const waitSeconds=Math.ceil((5000-(Date.now()-lastAttempt))/1000);
+    if (waitSeconds>0) {
+      res.setHeader('Retry-After',String(waitSeconds));
+      return send(res,429,{error:'Wacht nog '+waitSeconds+' seconden voor een nieuwe zoekopdracht.'});
+    }
     busy=true;lastAttempt=Date.now();
-    try {const result=await search(input);cache.clear();cache.set(key,result);return send(res,200,{...result,cached:false});}
+    try {
+      const result=await search(input);
+      for(const [oldKey,value] of cache)if(Date.now()-Date.parse(value.fetchedAt)>=300000)cache.delete(oldKey);
+      if(cache.size>=20)cache.delete(cache.keys().next().value);
+      cache.set(key,result);return send(res,200,{...result,cached:false});
+    }
     catch(e) {return send(res,502,{error:e.name==='TimeoutError'?'Marktplaats reageert niet op tijd.':e.message});}
     finally {busy=false;}
   } catch {send(res,500,{error:'De aanvraag kon niet worden verwerkt.'});}

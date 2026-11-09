@@ -13,7 +13,7 @@ Zonder token weigert productie zoekverzoeken. De browser bewaart de code niet.
 PORT wordt door de host ingesteld; healthcheck is /health.
 
 Gebruik één serverinstantie: de globale limiet en resultaatcache zitten in het geheugen
-en worden bij herstart gewist. Maximaal één nieuwe zoekopdracht per vijf minuten;
+en worden bij herstart gewist. Maximaal één nieuwe zoekopdracht per vijf seconden;
 identieke opdrachten binnen die tijd gebruiken de cache. Geen scheduler of retries.
 Bij blokkade of fouten toont het dashboard geen oude resultaten als actueel.
 
