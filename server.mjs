@@ -18,10 +18,10 @@ http.createServer(async (req,res) => {
     const path = new URL(req.url,'http://localhost').pathname;
     if (req.method === 'GET' && path === '/health') return send(res,200,{ok:true});
     if (req.method === 'GET' && path === '/api/session') return send(res,200,{authenticated:authorized(req)});
-    if (req.method === 'GET' && ['/','/app.js','/style.css'].includes(path)) {
+    if (req.method === 'GET' && ['/','/app.js','/style.css','/categories.json'].includes(path)) {
       const file = path === '/' ? 'index.html' : path.slice(1);
       const content = await readFile(new URL(file,import.meta.url));
-      res.writeHead(200,{'Content-Type':file.endsWith('.js')?'text/javascript':file.endsWith('.css')?'text/css':'text/html; charset=utf-8',
+      res.writeHead(200,{'Content-Type':file.endsWith('.json')?'application/json; charset=utf-8':file.endsWith('.js')?'text/javascript':file.endsWith('.css')?'text/css':'text/html; charset=utf-8',
         'Content-Security-Policy':"default-src 'self'; script-src 'self'; style-src 'self'; connect-src 'self'; frame-ancestors 'none'; base-uri 'none'",
         'X-Content-Type-Options':'nosniff','Referrer-Policy':'no-referrer','Cache-Control':'no-store'});
       return res.end(content);

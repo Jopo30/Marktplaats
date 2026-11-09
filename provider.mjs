@@ -1,13 +1,20 @@
 // Search protocol: PonClick/marktplaats-mcp (MIT), commit 3923ab2aadef47ed2af6ee3b51a9ff3863cb250e.
 // See LICENSE-PonClick. This adapter does not run an MCP server.
+import {comparison} from './prices.mjs';
+import catalog from './categories.json' with {type:'json'};
 export function validate(input) {
   const query = String(input.query || '').trim();
   const postcode = String(input.postcode || '').replace(/\s/g, '').toUpperCase();
   const maxPrice = Number(input.maxPrice ?? 250);
-  if (!query || query.length > 80) throw new Error('Vul een zoekterm van maximaal 80 tekens in.');
+  const categoryId=Number(input.categoryId || 0),subcategoryId=Number(input.subcategoryId || 0);
+  if(!Number.isInteger(categoryId)||!Number.isInteger(subcategoryId))throw new Error('Ongeldige categorie.');
+  const category=catalog.categories.find(c=>c.id===categoryId);
+  if(categoryId && !category)throw new Error('Kies een geldige categorie.');
+  if(subcategoryId && !category?.children.some(c=>c.id===subcategoryId))throw new Error('Kies een subcategorie binnen de gekozen categorie.');
+  if ((!query && !categoryId) || query.length > 80) throw new Error('Vul een zoekterm in of kies een categorie (maximaal 80 tekens).');
   if (!/^[1-9][0-9]{3}[A-Z]{2}$/.test(postcode)) throw new Error('Vul een volledige Nederlandse postcode in.');
   if (!Number.isFinite(maxPrice) || maxPrice <= 0 || maxPrice > 10000) throw new Error('Kies een aankoopbudget tussen 1 en 10000 euro.');
-  return {query, postcode, maxPrice};
+  return {query, postcode, maxPrice,categoryId,subcategoryId};
 }
 export function normalize(data, maxPrice) {
   if (!Array.isArray(data.listings)) throw new Error('De gegevensbron geeft een onbekend antwoord.');
@@ -28,15 +35,17 @@ export function normalize(data, maxPrice) {
   });
 }
 export async function search(input, fetcher = fetch) {
-  const {query,postcode,maxPrice} = validate(input);
+  const {query,postcode,maxPrice,categoryId,subcategoryId} = validate(input);
   const url = new URL('https://www.marktplaats.nl/lrp/api/search');
   url.search = new URLSearchParams({query,postcode,distanceMeters:'100000',limit:'50',offset:'0',
     searchInTitleAndDescription:'true',viewOptions:'list-view',sortBy:'SORT_INDEX',sortOrder:'DECREASING',
     'attributesById[]':'32','attributeRanges[]':'PriceCents:0:' + maxPrice*100});
+  if(categoryId)url.searchParams.set('l1CategoryId',String(categoryId));
+  if(subcategoryId)url.searchParams.set('l2CategoryId',String(subcategoryId));
   const response = await fetcher(url,{headers:{Accept:'application/json'},signal:AbortSignal.timeout(15000),redirect:'error'});
   if ([403,429].includes(response.status)) throw new Error('Marktplaats beperkt de toegang. Er wordt niet automatisch opnieuw geprobeerd.');
   if (!response.ok) throw new Error('Gegevens ophalen mislukt (' + response.status + ').');
   return {source:'Marktplaats website (onofficiële proef)',fetchedAt:new Date().toISOString(),
-    listings:normalize(await response.json(),maxPrice),
+    listings:normalize(await response.json(),maxPrice).map(item=>({...item,newPrice:comparison(item)})),
     note:'Maximaal 50 zoekresultaten beoordeeld; alleen vaste prijzen en bekende afstanden. Werking is niet geverifieerd.'};
 }

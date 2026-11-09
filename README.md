@@ -30,3 +30,7 @@ overnemen. Beschikbaarheid van het website-endpoint geeft geen toestemming.
 
 ## Inloggen
 Gebruik de bestaande dashboardtoegangscode als wachtwoord. Optioneel 30 dagen ingelogd blijven via een ondertekende HttpOnly/Secure/SameSite=Strict-cookie; anders een browser-sessie met maximaal 12 uur geldigheid. Uitloggen wist de cookie. De server bewaart geen wachtwoord in browseropslag. Een herstart behoudt geldige cookies zolang de servercode ongewijzigd blijft. Roteer DEALHUNTER_ACCESS_TOKEN om alle sessies ongeldig te maken. Maximaal tien mislukte inlogpogingen per kwartier per serverinstantie. Zoekverzoeken gebruiken voortaan de sessiecookie; Bearer-authenticatie is vervangen.
+
+## Categorieën en nieuwprijzen
+36 hoofdcategorieën en bijbehorende subcategorieën overgenomen van Marktplaats op 9 november 2026. De keuze wordt gevalideerd en als l1CategoryId/l2CategoryId meegestuurd; categorie zonder zoekterm is toegestaan. De cache onderscheidt categorieën.
+Nieuwprijsreferenties zijn handmatig gecontroleerde winkelprijzen voor Makita DJR187Z, DJR186Z, DHP484Z en DTM51Z, incl. btw en excl. verzending. Alleen passende losse machines worden vergeleken. Onbekende/afwijkende uitvoeringen en referenties ouder dan 30 dagen tonen onbekend. Geen automatische prijsfeed of winstclaim.

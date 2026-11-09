@@ -2,6 +2,18 @@ import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {normalize,validate,search} from './provider.mjs';
 const listing=(id='m123',extra={})=>({itemId:id,title:'Makita',description:'Gebruikt',priceInfo:{priceType:'FIXED',priceCents:10000},location:{distanceMeters:10000,cityName:'Harlingen'},...extra});
+test('validates category hierarchy and sends category-only searches',async()=>{
+  const input={query:'',postcode:'8861AA',maxPrice:250,categoryId:239,subcategoryId:241};
+  assert.throws(()=>validate({...input,categoryId:1}));
+  assert.throws(()=>validate({...input,categoryId:'invalid'}));
+  assert.throws(()=>validate({...input,categoryId:0}));
+  await search(input,async url=>{
+    assert.equal(url.searchParams.get('l1CategoryId'),'239');
+    assert.equal(url.searchParams.get('l2CategoryId'),'241');
+    assert.equal(url.searchParams.get('query'),'');
+    return {ok:true,status:200,json:async()=>({listings:[]})};
+  });
+});
 test('rejects invalid input before fetching',()=>{
   assert.throws(()=>validate({query:'Makita',postcode:'',maxPrice:250}));
   assert.throws(()=>validate({query:'Makita',postcode:'8861AA',maxPrice:-1}));
